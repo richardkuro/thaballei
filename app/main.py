@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -35,10 +36,11 @@ from app.youtube_service import (
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = BASE_DIR / "static"
-DOWNLOADS_DIR = BASE_DIR / "downloads"
-STEMS_DIR = BASE_DIR / "stems"
-MEDIA_DIR = BASE_DIR / "media"
-VIDEOS_DIR = BASE_DIR / "videos"
+STORAGE_ROOT = Path("/tmp/thaballei") if os.environ.get("VERCEL") else BASE_DIR
+DOWNLOADS_DIR = STORAGE_ROOT / "downloads"
+STEMS_DIR = STORAGE_ROOT / "stems"
+MEDIA_DIR = STORAGE_ROOT / "media"
+VIDEOS_DIR = STORAGE_ROOT / "videos"
 
 app = FastAPI(title="Thaballei Audio & Video Studio", version="3.0.0")
 download_manager = DownloadManager(download_dir=DOWNLOADS_DIR)
