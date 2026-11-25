@@ -15,19 +15,26 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-import soundfile as sf
-from pedalboard import (
-    Compressor,
-    Gain,
-    HighShelfFilter,
-    HighpassFilter,
-    Limiter,
-    LowShelfFilter,
-    LowpassFilter,
-    PeakFilter,
-    Pedalboard,
-)
+try:
+    import numpy as np
+    import soundfile as sf
+    from pedalboard import (
+        Compressor,
+        Gain,
+        HighShelfFilter,
+        HighpassFilter,
+        Limiter,
+        LowShelfFilter,
+        LowpassFilter,
+        PeakFilter,
+        Pedalboard,
+    )
+
+    AUDIO_DSP_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    np = None  # type: ignore[assignment]
+    sf = None  # type: ignore[assignment]
+    AUDIO_DSP_AVAILABLE = False
 
 from app.youtube_service import get_ffmpeg_path
 
