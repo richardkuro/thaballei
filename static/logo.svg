@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <!-- Main branching stems (Night-Blooming Jasmine / Thaballei) -->
+  <g stroke="#8bc49e" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Primary diagonal stem -->
+    <path d="M 38 198 C 60 172, 92 138, 134 94" />
+    <!-- Upper-left branch -->
+    <path d="M 78 152 C 74 128, 72 100, 74 68" />
+    <path d="M 74 106 C 64 90, 56 76, 52 62" />
+    <!-- Upper-middle branchlets -->
+    <path d="M 118 110 C 122 92, 128 74, 134 56" />
+    <path d="M 124 98 C 138 86, 152 78, 166 72" />
+    <path d="M 118 106 C 108 92, 104 82, 102 68" />
+    <!-- Lower-right branch -->
+    <path d="M 94 136 C 122 132, 148 128, 174 120" />
+    <path d="M 142 130 C 154 118, 162 110, 166 98" />
+    <path d="M 150 128 C 166 136, 178 144, 188 152" />
+  </g>
+
+  <!-- Leaves -->
+  <g fill="#8bc49e">
+    <!-- Left lower leaves -->
+    <path d="M 48 182 C 32 184, 24 174, 26 154 C 38 164, 46 172, 48 182 Z" />
+    <path d="M 62 164 C 42 162, 34 142, 42 114 C 54 130, 62 148, 62 164 Z" />
+    <path d="M 56 178 C 72 174, 88 180, 104 192 C 84 196, 68 190, 56 178 Z" />
+    <path d="M 74 156 C 90 148, 108 150, 122 158 C 106 168, 88 166, 74 156 Z" />
+    <!-- Mid & upper small leaves -->
+    <path d="M 74 116 C 60 118, 52 114, 48 106 C 58 106, 68 110, 74 116 Z" />
+    <path d="M 102 68 C 94 62, 94 52, 102 44 C 108 52, 108 62, 102 68 Z" />
+    <path d="M 122 92 C 110 94, 102 90, 96 82 C 106 82, 116 86, 122 92 Z" />
+    <path d="M 126 98 C 132 108, 130 116, 124 122 C 118 114, 120 104, 126 98 Z" />
+    <path d="M 142 132 C 138 144, 142 152, 148 156 C 152 146, 150 138, 142 132 Z" />
+    <!-- Closed bud tip -->
+    <path d="M 184 150 C 194 148, 200 154, 196 160 C 188 162, 182 156, 184 150 Z" />
+  </g>
+
+  <!-- Golden calyxes on side-view blossoms -->
+  <g fill="#e0b469">
+    <path d="M 48 64 L 58 58 L 54 48 L 44 54 Z" />
+    <path d="M 160 100 L 170 96 L 166 86 L 156 90 Z" />
+  </g>
+
+  <!-- Blossom 1: Top-left side-view -->
+  <g fill="#f5f4ec">
+    <path d="M 46 56 C 34 52, 26 44, 30 38 C 36 38, 44 44, 48 54 Z" />
+    <path d="M 48 54 C 42 40, 42 30, 48 28 C 54 32, 54 42, 52 54 Z" />
+    <path d="M 52 54 C 54 42, 60 34, 66 36 C 66 44, 60 50, 54 56 Z" />
+  </g>
+
+  <!-- Blossom 2: Upper-left full star -->
+  <g transform="translate(80, 44)">
+    <g fill="#f5f4ec">
+      <path d="M 0 -4 C -5 -16, -5 -26, 1 -28 C 6 -26, 6 -16, 3 -4 Z" />
+      <path d="M 3 -3 C 12 -12, 20 -18, 24 -14 C 24 -8, 16 -2, 5 0 Z" />
+      <path d="M 4 1 C 16 2, 24 6, 22 12 C 16 14, 8 10, 2 4 Z" />
+      <path d="M 1 4 C 5 16, 4 26, -2 26 C -6 24, -6 14, -2 4 Z" />
+      <path d="M -3 3 C -14 10, -24 10, -24 4 C -22 -2, -12 -2, -4 0 Z" />
+      <path d="M -3 -2 C -14 -10, -20 -18, -14 -22 C -8 -22, -2 -12, 0 -4 Z" />
+    </g>
+    <circle cx="0" cy="0" r="3.6" fill="#e8d6b3" />
+  </g>
+
+  <!-- Blossom 3: Top-center star -->
+  <g transform="translate(138, 38)">
+    <g fill="#f5f4ec">
+      <path d="M -1 -4 C -6 -16, -6 -26, 0 -27 C 6 -25, 6 -15, 3 -4 Z" />
+      <path d="M 3 -2 C 14 -10, 24 -12, 25 -6 C 24 0, 14 2, 4 1 Z" />
+      <path d="M 3 2 C 14 8, 20 16, 15 21 C 10 21, 4 12, 0 4 Z" />
+      <path d="M 0 4 C -2 16, -6 25, -12 23 C -14 17, -9 9, -3 3 Z" />
+      <path d="M -3 1 C -15 3, -24 0, -23 -6 C -18 -9, -10 -6, -3 -1 Z" />
+      <path d="M -2 -3 C -10 -14, -12 -23, -6 -24 C -1 -22, 1 -13, 0 -4 Z" />
+    </g>
+    <circle cx="0" cy="0" r="3.6" fill="#e8d6b3" />
+  </g>
+
+  <!-- Blossom 4: Upper-right star -->
+  <g transform="translate(174, 68)">
+    <g fill="#f5f4ec">
+      <path d="M 0 -4 C -4 -16, -2 -26, 4 -26 C 9 -23, 8 -14, 3 -4 Z" />
+      <path d="M 3 -2 C 15 -9, 24 -9, 25 -3 C 23 3, 14 4, 4 1 Z" />
+      <path d="M 3 2 C 12 12, 16 21, 10 24 C 5 23, 1 14, 0 4 Z" />
+      <path d="M -1 4 C -6 15, -12 22, -17 19 C -18 13, -11 7, -3 2 Z" />
+      <path d="M -4 0 C -16 0, -25 -4, -23 -10 C -18 -13, -10 -8, -3 -2 Z" />
+      <path d="M -2 -3 C -9 -14, -9 -24, -3 -25 C 2 -22, 2 -12, 0 -4 Z" />
+    </g>
+    <circle cx="0" cy="0" r="3.5" fill="#e8d6b3" />
+  </g>
+
+  <!-- Blossom 5: Lower-right side-view -->
+  <g fill="#f5f4ec">
+    <path d="M 158 92 C 148 84, 144 74, 150 70 C 156 72, 160 80, 162 90 Z" />
+    <path d="M 162 90 C 160 76, 162 66, 168 66 C 174 70, 172 80, 166 90 Z" />
+    <path d="M 166 92 C 172 80, 180 74, 186 78 C 184 86, 176 90, 168 94 Z" />
+  </g>
+
+  <!-- Blossom 6: Bottom-right star -->
+  <g transform="translate(194, 114)">
+    <g fill="#f5f4ec">
+      <path d="M 0 -4 C -5 -16, -4 -26, 2 -27 C 7 -24, 7 -15, 3 -4 Z" />
+      <path d="M 3 -2 C 14 -10, 24 -10, 25 -4 C 23 2, 14 3, 4 1 Z" />
+      <path d="M 3 2 C 13 11, 17 20, 11 23 C 6 22, 2 14, 0 4 Z" />
+      <path d="M -1 4 C -5 16, -10 23, -15 21 C -16 15, -10 8, -3 2 Z" />
+      <path d="M -4 1 C -16 2, -24 -2, -23 -8 C -18 -11, -10 -7, -3 -1 Z" />
+      <path d="M -2 -3 C -10 -13, -11 -23, -5 -24 C 0 -22, 1 -12, 0 -4 Z" />
+    </g>
+    <circle cx="0" cy="0" r="3.6" fill="#e8d6b3" />
+  </g>
+</svg>

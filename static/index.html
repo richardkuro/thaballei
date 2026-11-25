@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>THABALLEI // AUDIO DAW</title>
+  <link rel="icon" type="image/svg+xml" href="/static/logo.svg" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="/static/logo.svg" alt="Thaballei Logo" class="brand-logo" />
+        <div>
+          <div class="brand-title-row">
+            <h1>THABALLEI</h1>
+            <span class="dot-tag">DAW // OS</span>
+          </div>
+          <p class="subtitle">YouTube Extractor • Real-Time Multi-Track DAW • Parametric DSP</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <nav class="tabs" role="tablist">
+          <button type="button" class="tab-btn active" data-tab="finder">01 FINDER</button>
+          <button type="button" class="tab-btn" data-tab="studio">02 DAW</button>
+          <button type="button" class="tab-btn" data-tab="video">03 VIDEO</button>
+        </nav>
+        <button type="button" class="theme-toggle" id="themeToggle" title="Switch Light / Dark Mode">
+          <span class="status-dot"></span>
+          <span id="themeLabel">LIGHT</span>
+        </button>
+        <div class="status-pill" id="gpuStatus">GPU: ...</div>
+        <div class="status-pill" id="ffmpegStatus">FFMPEG: ...</div>
+        <div class="task-pill mono" id="taskBanner">
+          <span class="dot-indicator" id="taskDot"></span>
+          <span id="taskStatusText">IDLE</span>
+          <span class="muted" id="taskDetailText"></span>
+          <button type="button" class="ghost-btn hidden" id="taskForwardBtn">→ NEXT STAGE</button>
+          <div class="mini-progress hidden" id="taskProgressWrap">
+            <div class="progress-fill" id="taskProgressFill" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- TAB 1: YOUTUBE FINDER -->
+    <div id="tab-finder" class="tab-content active">
+      <section class="search-panel module-card">
+        <form id="searchForm" class="search-form">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="SEARCH YOUTUBE OR PASTE DIRECT URL..."
+            autocomplete="off"
+            required
+          />
+          <select id="formatSelect" title="Output Audio Format">
+            <option value="best">BEST NATIVE (ZERO LOSS)</option>
+            <option value="mp3">MP3 (320 KBPS + ART)</option>
+            <option value="flac">FLAC (LOSSLESS)</option>
+            <option value="m4a">M4A / AAC (+ ART)</option>
+            <option value="opus">OPUS</option>
+            <option value="wav">WAV (PCM)</option>
+          </select>
+          <button type="submit" id="searchBtn" class="btn-primary">FIND VIDEO</button>
+        </form>
+        <div class="save-dir-row">
+          <span class="mono small-text muted">SAVE TO:</span>
+          <input type="text" id="dlSaveDirInput" class="save-dir-input" placeholder="Default (app/downloads)" readonly />
+          <button type="button" class="ghost-btn" id="dlPickDirBtn">CHOOSE FOLDER</button>
+          <button type="button" class="ghost-btn" id="dlClearDirBtn" title="Reset to default">✕</button>
+        </div>
+        <p class="format-hint mono" id="formatHint">
+          BEST NATIVE: Downloads highest-bitrate original Opus/M4A stream with zero re-encoding loss.
+        </p>
+      </section>
+
+      <main class="workspace">
+        <section class="results-section">
+          <div class="section-header">
+            <h2>SEARCH RESULTS</h2>
+            <span class="mono muted" id="resultsCount">0 ITEMS</span>
+          </div>
+          <div id="resultsGrid" class="results-grid">
+            <div class="empty-state mono">
+              ENTER A SONG, ARTIST, OR YOUTUBE LINK ABOVE TO BEGIN.
+            </div>
+          </div>
+        </section>
+
+        <aside class="sidebar">
+          <section class="module-card">
+            <div class="section-header">
+              <h2>AUDIO LIBRARY</h2>
+              <div class="row-gap">
+                <label class="ghost-btn upload-label" title="Upload an old song or local audio file">
+                  + UPLOAD
+                  <input type="file" id="uploadInput" accept="audio/*" hidden />
+                </label>
+                <button type="button" class="ghost-btn" id="refreshFilesBtn">SYNC</button>
+              </div>
+            </div>
+            <div id="filesList" class="files-list">
+              <div class="empty-state small mono">EMPTY // DOWNLOAD OR UPLOAD AUDIO</div>
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <!-- TAB 2: SINGLE-PAGE REAL-TIME DAW (LEFT: TRACKS, RIGHT: PACKED MIXER/DSP) -->
+    <div id="tab-studio" class="tab-content hidden daw-viewport">
+      <!-- TOP TRANSPORT & REAL-TIME ANALYZERS -->
+      <section class="module-card daw-top-strip">
+        <div class="daw-transport">
+          <button type="button" class="btn-primary transport-play-btn" id="dawPlayBtn">▶ PLAY</button>
+          <button type="button" class="ghost-btn" id="dawStopBtn">■ STOP</button>
+          <button type="button" class="ghost-btn" id="dawLoopBtn">LOOP: OFF</button>
+          <select id="dawSpeedSelect" class="speed-select" title="Playback Speed">
+            <option value="0.75">0.75x</option>
+            <option value="0.9">0.90x</option>
+            <option value="1" selected>1.00x</option>
+            <option value="1.1">1.10x</option>
+            <option value="1.25">1.25x</option>
+          </select>
+          <input type="range" class="transport-seek" id="dawSeek" min="0" max="100" step="0.05" value="0" />
+          <span class="daw-time" id="dawTime">00:00.0 / 00:00.0</span>
+          <button type="button" class="ghost-btn bypass-btn" id="dspBypassBtn" title="A/B Compare Original vs Processed">
+            DSP: ON
+          </button>
+        </div>
+        <div class="meters-row">
+          <canvas id="spectrumCanvas" height="44"></canvas>
+          <canvas id="vuCanvas" height="44" class="vu-canvas"></canvas>
+        </div>
+      </section>
+
+      <!-- MAIN SPLIT: LEFT = ALL AUDIO TRACKS, RIGHT = PACKED MIXER / DSP -->
+      <div class="daw-split">
+        <!-- LEFT HAND SIDE: ALL TRACKS + SOURCE BAR -->
+        <section class="module-card daw-left-pane">
+          <div class="daw-source-compact">
+            <select id="libraryAddSelect" class="grow-select" title="Library Audio">
+              <option value="">-- SELECT AUDIO FILE --</option>
+            </select>
+            <button type="button" class="btn-secondary" id="addLibraryTrackBtn">+ ADD</button>
+            <select id="stemModelSelect" title="Demucs Model"></select>
+            <button type="button" class="btn-secondary" id="separateSelectedBtn">SEPARATE</button>
+            <select id="stemSetSelect" title="Saved Stem Sets">
+              <option value="">-- STEMS --</option>
+            </select>
+            <button type="button" class="ghost-btn" id="loadStemSetBtn">LOAD</button>
+            <label class="btn-secondary upload-label">
+              + UPLOAD
+              <input type="file" id="studioUploadInput" accept="audio/*" hidden />
+            </label>
+          </div>
+
+          <div class="section-header compact-header">
+            <h2>AUDIO TRACKS</h2>
+            <div class="row-gap">
+              <button type="button" class="ghost-btn" id="quickKaraokeBtn">KARAOKE</button>
+              <button type="button" class="ghost-btn" id="quickVocalsBtn">VOCALS</button>
+              <button type="button" class="ghost-btn" id="quickUnmuteBtn">ALL ON</button>
+              <button type="button" class="danger-btn" id="clearTracksBtn">CLEAR</button>
+            </div>
+          </div>
+
+          <div id="dawTracksList" class="daw-tracks-grid">
+            <div class="empty-state mono">
+              NO TRACKS LOADED. ADD A TRACK, UPLOAD A FILE, OR SEPARATE STEMS ABOVE.
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT HAND SIDE: PACKED PARAMETRIC MIXER & DSP RACK -->
+        <aside class="module-card daw-right-pane">
+          <div class="section-header compact-header">
+            <h2>MIXER // PARAMETRIC DSP</h2>
+            <select id="remasterPreset" class="preset-compact"></select>
+          </div>
+
+          <div class="packed-dsp-grid">
+            <!-- FILTER & DYNAMICS -->
+            <div class="dsp-cell">
+              <label>HP CUT <span id="hpFreqVal">30</span>Hz</label>
+              <input type="range" id="hpFreqSlider" min="20" max="250" value="30" />
+            </div>
+            <div class="dsp-cell">
+              <label>LP CUT <span id="lpFreqVal">20000</span>Hz</label>
+              <input type="range" id="lpFreqSlider" min="6000" max="20000" step="100" value="20000" />
+            </div>
+
+            <div class="dsp-cell">
+              <label>NOISE FILTER <span id="noiseVal">15</span>%</label>
+              <input type="range" id="noiseSlider" min="0" max="100" value="15" />
+            </div>
+            <div class="dsp-cell">
+              <label>ECHO FILTER <span id="echoVal">0</span>%</label>
+              <input type="range" id="echoSlider" min="0" max="100" value="0" />
+            </div>
+
+            <!-- 4-BAND PARAMETRIC EQ (FREQ + GAIN FOR EACH BAND) -->
+            <div class="dsp-cell">
+              <label>LOW FREQ <span id="bassFreqVal">90</span>Hz</label>
+              <input type="range" id="bassFreqSlider" min="40" max="300" value="90" />
+            </div>
+            <div class="dsp-cell">
+              <label>LOW GAIN <span id="bassGainVal">+2.5</span>dB</label>
+              <input type="range" id="bassGainSlider" min="-12" max="12" step="0.5" value="2.5" />
+            </div>
+
+            <div class="dsp-cell">
+              <label>MID FREQ <span id="midFreqVal">300</span>Hz</label>
+              <input type="range" id="midFreqSlider" min="150" max="1200" step="10" value="300" />
+            </div>
+            <div class="dsp-cell">
+              <label>MID GAIN <span id="midGainVal">-2.0</span>dB</label>
+              <input type="range" id="midGainSlider" min="-12" max="12" step="0.5" value="-2.0" />
+            </div>
+
+            <div class="dsp-cell">
+              <label>PRES FREQ <span id="presFreqVal">3200</span>Hz</label>
+              <input type="range" id="presFreqSlider" min="800" max="6500" step="50" value="3200" />
+            </div>
+            <div class="dsp-cell">
+              <label>PRES GAIN <span id="presGainVal">+2.5</span>dB</label>
+              <input type="range" id="presGainSlider" min="-12" max="12" step="0.5" value="2.5" />
+            </div>
+
+            <div class="dsp-cell">
+              <label>AIR FREQ <span id="airFreqVal">10000</span>Hz</label>
+              <input type="range" id="airFreqSlider" min="4000" max="18000" step="100" value="10000" />
+            </div>
+            <div class="dsp-cell">
+              <label>AIR GAIN <span id="airGainVal">+3.0</span>dB</label>
+              <input type="range" id="airGainSlider" min="-12" max="12" step="0.5" value="3.0" />
+            </div>
+
+            <!-- WIDTH, COMP, MASTER -->
+            <div class="dsp-cell">
+              <label>WIDTH <span id="widthVal">35</span>%</label>
+              <input type="range" id="widthSlider" min="0" max="100" value="35" />
+            </div>
+            <div class="dsp-cell">
+              <label>COMP <span id="compVal">45</span>%</label>
+              <input type="range" id="compSlider" min="0" max="100" value="45" />
+            </div>
+
+            <div class="dsp-cell span-2">
+              <label>MASTER GAIN <span id="masterGainVal">100</span>%</label>
+              <input type="range" id="masterGainSlider" min="0" max="150" value="100" />
+            </div>
+          </div>
+
+          <div class="save-dir-row compact-save-dir">
+            <input type="text" id="dawSaveDirInput" class="save-dir-input" placeholder="Save folder: Default (downloads/)" readonly />
+            <button type="button" class="ghost-btn" id="dawPickDirBtn">FOLDER</button>
+            <button type="button" class="ghost-btn" id="dawClearDirBtn" title="Reset to default">✕</button>
+          </div>
+
+          <div class="packed-export-bar">
+            <input type="text" id="exportNameInput" value="DAW_Master" placeholder="Output name..." class="export-name-input" />
+            <select id="remasterFormat"></select>
+            <label class="checkbox-label mono small-text" title="Normalize to -14 LUFS">
+              <input type="checkbox" id="loudnormCheck" checked />
+              -14 LUFS
+            </label>
+            <button type="button" id="renderMasterBtn" class="btn-primary export-btn">EXPORT</button>
+            <button type="button" id="forwardDawToVideoBtn" class="btn-secondary" title="Export or forward to Video Studio">→ VIDEO</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- TAB 3: VIDEO & LYRIC / KARAOKE STUDIO -->
+    <div id="tab-video" class="tab-content hidden daw-viewport">
+      <div class="daw-split video-split">
+        <!-- LEFT: BACKGROUND MEDIA + AUDIO + LIVE PREVIEW CANVAS + RENDERED VIDEOS -->
+        <section class="module-card daw-left-pane">
+          <div class="daw-source-compact">
+            <select id="videoMediaSelect" class="grow-select" title="Photo / GIF / Video Background">
+              <option value="">-- SELECT PHOTO / GIF / VIDEO --</option>
+            </select>
+            <label class="btn-secondary upload-label">
+              + MEDIA
+              <input type="file" id="videoMediaUpload" accept="image/*,video/*,.gif" hidden />
+            </label>
+            <select id="videoAudioSelect" class="grow-select" title="Background Audio Track">
+              <option value="">-- SELECT AUDIO TRACK --</option>
+            </select>
+          </div>
+
+          <div class="video-preview-wrap">
+            <canvas id="videoPreviewCanvas" width="640" height="360"></canvas>
+            <video id="hiddenBgVideo" class="hidden" muted loop playsinline></video>
+          </div>
+
+          <div class="daw-transport compact-transport">
+            <button type="button" class="btn-primary" id="vidPlayBtn">▶ PREVIEW</button>
+            <button type="button" class="ghost-btn" id="vidStopBtn">■ STOP</button>
+            <input type="range" class="transport-seek" id="vidSeek" min="0" max="100" step="0.05" value="0" />
+            <span class="daw-time" id="vidTime">00:00.0 / 00:00.0</span>
+          </div>
+
+          <div class="lyric-timeline-wrap">
+            <div class="meter-label mono">DRAGGABLE LYRIC TIMELINE (DRAG BLOCKS OR EDGES • NO OVERLAP)</div>
+            <canvas id="lyricTimelineCanvas" height="44"></canvas>
+          </div>
+
+          <div class="section-header compact-header">
+            <h2>RENDERED VIDEOS (.MP4)</h2>
+            <button type="button" class="ghost-btn" id="refreshVideosBtn">SYNC</button>
+          </div>
+          <div id="renderedVideosList" class="rendered-videos-list">
+            <div class="empty-state small mono">NO VIDEOS RENDERED YET.</div>
+          </div>
+        </section>
+
+        <!-- RIGHT: PACKED LYRIC EDITOR, STYLE & EXPORT -->
+        <aside class="module-card daw-right-pane">
+          <div class="section-header compact-header">
+            <h2>LYRIC // KARAOKE STUDIO</h2>
+            <div class="row-gap">
+              <button type="button" class="ghost-btn" id="vidTapBtn" title="Stamp active lyric line at current playback second">⏱ STAMP LINE</button>
+              <button type="button" class="ghost-btn" id="vidAddLineBtn">+ LINE</button>
+            </div>
+          </div>
+
+          <div class="lyric-import-row">
+            <textarea id="lyricRawInput" rows="2" placeholder="Paste lyrics or [mm:ss.xx] LRC lines here..."></textarea>
+            <button type="button" class="btn-secondary" id="parseLyricsBtn">IMPORT</button>
+          </div>
+
+          <div id="lyricRowsList" class="lyric-rows-list">
+            <div class="empty-state small mono">NO LYRICS YET. PASTE TEXT ABOVE OR CLICK + LINE.</div>
+          </div>
+
+          <div class="packed-dsp-grid">
+            <div class="dsp-cell">
+              <label>RES</label>
+              <select id="vidResSelect"></select>
+            </div>
+            <div class="dsp-cell">
+              <label>POS</label>
+              <select id="vidPosSelect">
+                <option value="bottom">Bottom</option>
+                <option value="center">Center</option>
+                <option value="top">Top</option>
+              </select>
+            </div>
+            <div class="dsp-cell">
+              <label>FONT <span id="vidFontVal">54</span>px</label>
+              <input type="range" id="vidFontSlider" min="24" max="110" value="54" />
+            </div>
+            <div class="dsp-cell">
+              <label>BG DIM <span id="vidDimVal">25</span>%</label>
+              <input type="range" id="vidDimSlider" min="0" max="80" value="25" />
+            </div>
+            <div class="dsp-cell">
+              <label>FADE IN <span id="vidFadeInVal">350</span>ms</label>
+              <input type="range" id="vidFadeInSlider" min="0" max="1500" step="50" value="350" />
+            </div>
+            <div class="dsp-cell">
+              <label>FADE OUT <span id="vidFadeOutVal">350</span>ms</label>
+              <input type="range" id="vidFadeOutSlider" min="0" max="1500" step="50" value="350" />
+            </div>
+            <div class="dsp-cell">
+              <label>TEXT COLOR</label>
+              <input type="color" id="vidColorInput" value="#ffffff" />
+            </div>
+            <div class="dsp-cell">
+              <label>INTRO TITLE</label>
+              <input type="text" id="vidTitleInput" placeholder="Optional title..." />
+            </div>
+          </div>
+
+          <div class="save-dir-row compact-save-dir">
+            <input type="text" id="vidSaveDirInput" class="save-dir-input" placeholder="Save folder: Default (videos/)" readonly />
+            <button type="button" class="ghost-btn" id="vidPickDirBtn">FOLDER</button>
+            <button type="button" class="ghost-btn" id="vidClearDirBtn" title="Reset to default">✕</button>
+          </div>
+
+          <div class="packed-export-bar">
+            <input type="text" id="vidOutputName" value="Lyric_Video" placeholder="Video filename..." class="export-name-input" />
+            <button type="button" id="renderVideoBtn" class="btn-primary">RENDER .MP4</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stream Inspector Modal -->
+  <div id="inspectModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card module-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">AUDIO STREAMS</h3>
+        <button type="button" class="ghost-btn" id="closeModalBtn">✕</button>
+      </div>
+      <div id="modalBody" class="modal-body mono">Inspecting streams...</div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
