@@ -29,9 +29,14 @@ from app.video_studio import (
 from app.youtube_service import (
     SUPPORTED_FORMATS,
     DownloadManager,
+    delete_cookies_file,
     get_audio_formats,
     get_ffmpeg_path,
+    get_youtube_status,
+    save_cookies_content,
     search_videos,
+    set_configured_browser,
+    test_youtube_connection,
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -156,6 +161,47 @@ def list_formats() -> dict[str, Any]:
     }
 
 
+class BrowserCookiesRequest(BaseModel):
+    browser: str | None = Field(default=None, description="Browser name to import cookies from (e.g. firefox)")
+
+
+@app.get("/api/youtube/status")
+def youtube_status() -> dict[str, Any]:
+    """Return status of YouTube anti-bot protections, active cookies, and JS runtimes."""
+    return get_youtube_status()
+
+
+@app.post("/api/youtube/cookies/browser")
+def set_browser_cookies(payload: BrowserCookiesRequest) -> dict[str, Any]:
+    """Configure browser to extract cookies from (e.g. 'firefox')."""
+    set_configured_browser(payload.browser)
+    return get_youtube_status()
+
+
+@app.post("/api/youtube/cookies/upload")
+async def upload_cookies_file(file: UploadFile = File(...)) -> dict[str, Any]:
+    """Upload a Netscape cookies.txt file to authenticate with YouTube."""
+    content = await file.read()
+    if not content or len(content.strip()) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded cookie file is empty.")
+    save_cookies_content(content)
+    return get_youtube_status()
+
+
+@app.delete("/api/youtube/cookies")
+def clear_cookies() -> dict[str, Any]:
+    """Remove active custom cookies.txt and reset browser cookie selection."""
+    delete_cookies_file()
+    set_configured_browser(None)
+    return get_youtube_status()
+
+
+@app.post("/api/youtube/test")
+def test_youtube() -> dict[str, Any]:
+    """Verify YouTube connection and ability to search/extract."""
+    return test_youtube_connection()
+
+
 @app.get("/api/search")
 def search(
     q: str = Query(..., min_length=1, description="Search query or YouTube URL"),
@@ -165,7 +211,15 @@ def search(
     try:
         results = search_videos(q, limit=limit)
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"YouTube search failed: {exc}") from exc
+        err_msg = str(exc)
+        if "Sign in to confirm you’re not a bot" in err_msg or "confirm you're not a bot" in err_msg:
+            detail = (
+                "YouTube requires authentication ('Sign in to confirm you’re not a bot'). "
+                "Click 'YT COOKIES' in the top bar to enable Firefox cookies or upload a cookies.txt file."
+            )
+        else:
+            detail = f"YouTube search failed: {exc}"
+        raise HTTPException(status_code=502, detail=detail) from exc
     return {"query": q, "count": len(results), "results": results}
 
 
@@ -175,7 +229,15 @@ def inspect_video(url: str = Query(..., min_length=5)) -> dict[str, Any]:
     try:
         return get_audio_formats(url)
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Failed to inspect video: {exc}") from exc
+        err_msg = str(exc)
+        if "Sign in to confirm you’re not a bot" in err_msg or "confirm you're not a bot" in err_msg:
+            detail = (
+                "YouTube requires authentication ('Sign in to confirm you’re not a bot'). "
+                "Click 'YT COOKIES' in the top bar to enable Firefox cookies or upload a cookies.txt file."
+            )
+        else:
+            detail = f"Failed to inspect video: {exc}"
+        raise HTTPException(status_code=502, detail=detail) from exc
 
 
 @app.post("/api/download")

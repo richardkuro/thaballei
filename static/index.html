@@ -32,6 +32,7 @@
         </button>
         <div class="status-pill" id="gpuStatus">GPU: ...</div>
         <div class="status-pill" id="ffmpegStatus">FFMPEG: ...</div>
+        <div class="status-pill pointer" id="ytStatus" title="Configure YouTube Cookies & Bot Protection">YT: ...</div>
         <div class="task-pill mono" id="taskBanner">
           <span class="dot-indicator" id="taskDot"></span>
           <span id="taskStatusText">IDLE</span>
@@ -70,6 +71,10 @@
           <input type="text" id="dlSaveDirInput" class="save-dir-input" placeholder="Default (app/downloads)" readonly />
           <button type="button" class="ghost-btn" id="dlPickDirBtn">CHOOSE FOLDER</button>
           <button type="button" class="ghost-btn" id="dlClearDirBtn" title="Reset to default">✕</button>
+          <button type="button" class="ghost-btn yt-auth-btn" id="ytAuthBtn" title="Configure YouTube Cookies & Bot Protection">
+            <span class="status-dot-sm" id="ytAuthDot"></span>
+            <span id="ytAuthLabel">YT COOKIES</span>
+          </button>
         </div>
         <p class="format-hint mono" id="formatHint">
           BEST NATIVE: Downloads highest-bitrate original Opus/M4A stream with zero re-encoding loss.
@@ -399,6 +404,53 @@
         <button type="button" class="ghost-btn" id="closeModalBtn">✕</button>
       </div>
       <div id="modalBody" class="modal-body mono">Inspecting streams...</div>
+    </div>
+  </div>
+
+  <!-- YouTube Authentication & Cookie Manager Modal -->
+  <div id="ytAuthModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card module-card yt-auth-modal-card">
+      <div class="modal-header">
+        <h3>YOUTUBE BOT PROTECTION & COOKIES</h3>
+        <button type="button" class="ghost-btn" id="closeYtAuthModalBtn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="yt-status-box" id="ytStatusDetails">
+          <p class="mono small-text">Checking YouTube status...</p>
+        </div>
+
+        <div class="yt-auth-options">
+          <div class="auth-option-card">
+            <div class="auth-card-title">OPTION 1: FIREFOX COOKIES (DIRECT ACCESS)</div>
+            <p class="muted small-text">
+              If Firefox is installed and logged into YouTube, Thaballei can read its session cookies directly with no manual exports needed.
+            </p>
+            <div class="row-gap mt-2">
+              <button type="button" class="btn-primary" id="useFirefoxBtn">USE FIREFOX COOKIES</button>
+            </div>
+          </div>
+
+          <div class="auth-option-card">
+            <div class="auth-card-title">OPTION 2: IMPORT COOKIES.TXT (CHROME, EDGE, BRAVE)</div>
+            <p class="muted small-text">
+              Due to Windows DPAPI encryption on Chromium browsers (Chrome/Edge 127+), export YouTube cookies as Netscape format using an extension like
+              <strong>Get cookies.txt LOCALLY</strong> or <strong>Cookie-Editor</strong>, then upload here or drop <code>cookies.txt</code> into the app folder.
+            </p>
+            <div class="row-gap mt-2">
+              <label class="btn-primary upload-label" style="cursor: pointer;">
+                + UPLOAD COOKIES.TXT
+                <input type="file" id="cookiesFileInput" accept=".txt" hidden />
+              </label>
+              <button type="button" class="ghost-btn" id="clearCookiesBtn">CLEAR / RESET COOKIES</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="yt-test-row">
+          <button type="button" class="ghost-btn" id="testYtBtn">⚡ TEST YOUTUBE CONNECTION</button>
+          <span id="testYtResult" class="mono small-text"></span>
+        </div>
+      </div>
     </div>
   </div>
 

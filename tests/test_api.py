@@ -234,3 +234,37 @@ def test_lrc_ass_and_video_render(tmp_path: Path) -> None:
     out_mp4 = videos_dir / done["output_filename"]
     assert out_mp4.exists()
     assert out_mp4.stat().st_size > 1000
+
+
+def test_youtube_status_and_cookie_endpoints() -> None:
+    res = client.get("/api/youtube/status")
+    assert res.status_code == 200
+    data = res.json()
+    assert "cookies_active" in data
+    assert "node_available" in data
+    assert "detected_browsers" in data
+
+    # Set browser cookies
+    res_b = client.post("/api/youtube/cookies/browser", json={"browser": "firefox"})
+    assert res_b.status_code == 200
+    assert res_b.json()["configured_browser"] == "firefox"
+
+    # Reset
+    res_del = client.delete("/api/youtube/cookies")
+    assert res_del.status_code == 200
+    assert res_del.json()["configured_browser"] is None
+
+    # Test upload cookies
+    fake_cookie = b"# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t2147483647\tSID\tfake-cookie-val\n"
+    res_up = client.post(
+        "/api/youtube/cookies/upload",
+        files={"file": ("cookies.txt", fake_cookie, "text/plain")},
+    )
+    assert res_up.status_code == 200
+    assert res_up.json()["cookies_active"] is True
+    assert res_up.json()["source"] == "file"
+
+    # Clean up uploaded test cookie
+    res_clean = client.delete("/api/youtube/cookies")
+    assert res_clean.status_code == 200
+    assert res_clean.json()["cookies_active"] is False

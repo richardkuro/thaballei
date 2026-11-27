@@ -13,12 +13,24 @@ const uploadInput = document.getElementById("uploadInput");
 const studioUploadInput = document.getElementById("studioUploadInput");
 const ffmpegStatus = document.getElementById("ffmpegStatus");
 const gpuStatus = document.getElementById("gpuStatus");
+const ytStatus = document.getElementById("ytStatus");
+const ytAuthBtn = document.getElementById("ytAuthBtn");
+const ytAuthDot = document.getElementById("ytAuthDot");
+const ytAuthLabel = document.getElementById("ytAuthLabel");
 const themeToggle = document.getElementById("themeToggle");
 const themeLabel = document.getElementById("themeLabel");
 const inspectModal = document.getElementById("inspectModal");
 const modalTitle = document.getElementById("modalTitle");
 const modalBody = document.getElementById("modalBody");
 const closeModalBtn = document.getElementById("closeModalBtn");
+const ytAuthModal = document.getElementById("ytAuthModal");
+const closeYtAuthModalBtn = document.getElementById("closeYtAuthModalBtn");
+const ytStatusDetails = document.getElementById("ytStatusDetails");
+const useFirefoxBtn = document.getElementById("useFirefoxBtn");
+const cookiesFileInput = document.getElementById("cookiesFileInput");
+const clearCookiesBtn = document.getElementById("clearCookiesBtn");
+const testYtBtn = document.getElementById("testYtBtn");
+const testYtResult = document.getElementById("testYtResult");
 
 // Single-Task Pill
 const taskDot = document.getElementById("taskDot");
@@ -959,6 +971,79 @@ async function checkHealth() {
     ffmpegStatus.textContent = "OFFLINE";
     gpuStatus.textContent = "OFFLINE";
   }
+  checkYtStatus();
+}
+
+async function checkYtStatus() {
+  if (!ytStatus) return;
+  try {
+    const res = await fetch("/api/youtube/status");
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.cookies_active) {
+      ytStatus.textContent = `YT: ${data.source === "browser" ? data.configured_browser.toUpperCase() : "COOKIES"}`;
+      ytStatus.classList.add("ok");
+      if (ytAuthDot) {
+        ytAuthDot.className = "status-dot-sm active";
+      }
+      if (ytAuthLabel) {
+        ytAuthLabel.textContent = `YT: ${data.source.toUpperCase()} ACTIVE`;
+      }
+    } else {
+      ytStatus.textContent = "YT: READY";
+      ytStatus.classList.add("ok");
+      if (ytAuthDot) {
+        ytAuthDot.className = "status-dot-sm";
+      }
+      if (ytAuthLabel) {
+        ytAuthLabel.textContent = "YT COOKIES";
+      }
+    }
+    renderYtStatusDetails(data);
+  } catch {
+    ytStatus.textContent = "YT: OFFLINE";
+    ytStatus.classList.remove("ok");
+  }
+}
+
+function renderYtStatusDetails(data) {
+  if (!ytStatusDetails) return;
+  const cookieStatusBadge = data.cookies_active
+    ? `<span style="color: var(--ok); font-weight: bold;">ACTIVE (${escapeHtml(data.detail)})</span>`
+    : `<span style="color: var(--warn); font-weight: bold;">AUTO (Multi-Client Android/iOS Bypass Active)</span>`;
+
+  const nodeBadge = data.node_available
+    ? `<span style="color: var(--ok); font-weight: 600;">AVAILABLE (Node.js for JS Challenge Solving)</span>`
+    : `<span style="color: var(--muted);">NOT FOUND</span>`;
+
+  const browsersList = (data.detected_browsers || []).length
+    ? data.detected_browsers.map(b => `<span class="dot-tag">${escapeHtml(b.toUpperCase())}</span>`).join(" ")
+    : "None detected";
+
+  ytStatusDetails.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem;">
+      <div><strong>Cookie Session:</strong> ${cookieStatusBadge}</div>
+      <div><strong>JavaScript Solver:</strong> ${nodeBadge}</div>
+      <div><strong>Detected Browsers:</strong> ${browsersList}</div>
+      <p class="muted small-text" style="margin: 4px 0 0 0;">
+        Thaballei automatically bypasses YouTube bot verification using Android/MWeb API fallback. If a video is age-restricted, private, or blocked by YouTube on your IP, activate cookies below.
+      </p>
+    </div>
+  `;
+}
+
+function openYtAuthModal() {
+  if (ytAuthModal) {
+    ytAuthModal.classList.remove("hidden");
+    checkYtStatus();
+    if (testYtResult) testYtResult.textContent = "";
+  }
+}
+
+function closeYtAuthModal() {
+  if (ytAuthModal) {
+    ytAuthModal.classList.add("hidden");
+  }
 }
 
 async function loadStudioOptions() {
@@ -1072,7 +1157,21 @@ searchForm.addEventListener("submit", async (e) => {
     if (!res.ok) throw new Error(data.detail || "Search failed");
     renderResults(data.results || []);
   } catch (err) {
-    resultsGrid.innerHTML = `<div class="empty-state mono">ERROR: ${escapeHtml(err.message)}</div>`;
+    const isBotError = /bot|cookies|Sign in|authentication/i.test(err.message);
+    resultsGrid.innerHTML = `
+      <div class="empty-state mono">
+        <p>ERROR: ${escapeHtml(err.message)}</p>
+        ${
+          isBotError
+            ? '<button type="button" class="btn-primary mt-2" id="errAuthBtn">CONFIGURE YOUTUBE COOKIES / AUTH</button>'
+            : ""
+        }
+      </div>
+    `;
+    const errAuthBtn = document.getElementById("errAuthBtn");
+    if (errAuthBtn) {
+      errAuthBtn.addEventListener("click", openYtAuthModal);
+    }
   } finally {
     searchBtn.disabled = false;
     searchBtn.textContent = "FIND VIDEO";
@@ -1173,6 +1272,113 @@ closeModalBtn.addEventListener("click", () => inspectModal.classList.add("hidden
 inspectModal.addEventListener("click", (e) => {
   if (e.target === inspectModal) inspectModal.classList.add("hidden");
 });
+
+if (ytStatus) ytStatus.addEventListener("click", openYtAuthModal);
+if (ytAuthBtn) ytAuthBtn.addEventListener("click", openYtAuthModal);
+if (closeYtAuthModalBtn) closeYtAuthModalBtn.addEventListener("click", closeYtAuthModal);
+if (ytAuthModal) {
+  ytAuthModal.addEventListener("click", (e) => {
+    if (e.target === ytAuthModal) closeYtAuthModal();
+  });
+}
+
+if (useFirefoxBtn) {
+  useFirefoxBtn.addEventListener("click", async () => {
+    useFirefoxBtn.disabled = true;
+    useFirefoxBtn.textContent = "CONNECTING...";
+    try {
+      const res = await fetch("/api/youtube/cookies/browser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ browser: "firefox" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to set Firefox cookies");
+      checkYtStatus();
+      if (testYtResult) {
+        testYtResult.textContent = "✓ Firefox cookies activated!";
+        testYtResult.style.color = "var(--ok)";
+      }
+    } catch (err) {
+      alert("Could not load Firefox cookies: " + err.message);
+    } finally {
+      useFirefoxBtn.disabled = false;
+      useFirefoxBtn.textContent = "USE FIREFOX COOKIES";
+    }
+  });
+}
+
+if (cookiesFileInput) {
+  cookiesFileInput.addEventListener("change", async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch("/api/youtube/cookies/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to upload cookie file");
+      checkYtStatus();
+      if (testYtResult) {
+        testYtResult.textContent = `✓ Loaded ${file.name}!`;
+        testYtResult.style.color = "var(--ok)";
+      }
+    } catch (err) {
+      alert("Error uploading cookies: " + err.message);
+    } finally {
+      cookiesFileInput.value = "";
+    }
+  });
+}
+
+if (clearCookiesBtn) {
+  clearCookiesBtn.addEventListener("click", async () => {
+    if (!confirm("Reset custom YouTube cookies and revert to automatic bypass mode?")) return;
+    try {
+      await fetch("/api/youtube/cookies", { method: "DELETE" });
+      checkYtStatus();
+      if (testYtResult) {
+        testYtResult.textContent = "Cookies reset to auto bypass mode.";
+        testYtResult.style.color = "var(--muted)";
+      }
+    } catch (err) {
+      alert("Error clearing cookies: " + err.message);
+    }
+  });
+}
+
+if (testYtBtn) {
+  testYtBtn.addEventListener("click", async () => {
+    testYtBtn.disabled = true;
+    testYtBtn.textContent = "TESTING...";
+    if (testYtResult) {
+      testYtResult.textContent = "Testing connection to YouTube...";
+      testYtResult.style.color = "var(--muted)";
+    }
+    try {
+      const res = await fetch("/api/youtube/test", { method: "POST" });
+      const data = await res.json();
+      if (data.ok) {
+        testYtResult.textContent = "✓ " + data.message;
+        testYtResult.style.color = "var(--ok)";
+      } else {
+        testYtResult.textContent = "✕ " + data.message;
+        testYtResult.style.color = "var(--accent)";
+      }
+    } catch (err) {
+      if (testYtResult) {
+        testYtResult.textContent = "✕ Error: " + err.message;
+        testYtResult.style.color = "var(--accent)";
+      }
+    } finally {
+      testYtBtn.disabled = false;
+      testYtBtn.textContent = "⚡ TEST YOUTUBE CONNECTION";
+    }
+  });
+}
 
 async function handleFileUpload(file, autoAddToDaw = false) {
   if (!file) return;

@@ -1012,3 +1012,80 @@ canvas {
   color: var(--muted);
   font-weight: 600;
 }
+
+/* YouTube Auth & Cookie Styles */
+.pointer {
+  cursor: pointer;
+}
+
+.status-dot-sm {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--muted);
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.status-dot-sm.active {
+  background-color: var(--ok);
+  box-shadow: 0 0 6px var(--ok);
+}
+
+.status-dot-sm.warn {
+  background-color: var(--warn);
+}
+
+.yt-auth-btn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  padding: 6px 10px;
+}
+
+.yt-auth-modal-card {
+  width: min(620px, 100%);
+}
+
+.yt-status-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.yt-auth-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-option-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.auth-card-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.yt-test-row {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
